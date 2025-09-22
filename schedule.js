@@ -8,6 +8,44 @@
 // Ensure the user is authenticated before allowing interaction
 ensureLoggedIn();
 
+
+
+/* === Google Sheets backend glue === */
+let __movesCache = [];
+
+async function loadRangeFromBackend(start, end){
+  try{
+    __movesCache = await listMoves(start.toISOString(), end.toISOString());
+  }catch(e){
+    console.error('Failed to load from backend', e);
+    __movesCache = [];
+  }
+  // Convert rows to FullCalendar events
+  const events = __movesCache.filter(r => String(r.Deleted).toLowerCase() !== 'true').map(r => ({
+    id: r.ID,
+    title: r.Description || '',
+    start: r.StartISO,
+    end: r.EndISO,
+    extendedProps: { row:r, name:r.Name, kind:r.Kind }
+  }));
+  if (window.scheduleCalendar){
+    window.scheduleCalendar.removeAllEvents();
+    events.forEach(ev => window.scheduleCalendar.addEvent(ev));
+  }
+}
+
+async function createMoveFromModal(payload){
+  const res = await createMove(payload);
+  return res;
+}
+async function updateMoveFromModal(payload){
+  const res = await updateMove(payload);
+  return res;
+}
+async function deleteMoveById(id){
+  const res = await deleteMove(id);
+  return res;
+}
 const SCHEDULE_KEY = 'schedules';
 
 // Define appointment categories and their colours
