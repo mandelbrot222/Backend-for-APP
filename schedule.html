@@ -17,6 +17,7 @@
 
   <div class="container">
     <h1>Boat/Trailer Schedule</h1>
+
     <!-- Hidden modal for creating or editing appointments -->
     <div id="appointment-modal" class="modal" style="display: none;">
       <div class="modal-content">
@@ -56,15 +57,14 @@
       </aside>
     </div>
 
-    <!-- List of scheduled moves removed; appointments are only shown on the calendar -->
-
     <a href="menu.html" class="back-link">Back to Menu</a>
   </div>
 
   <script src="common.js"></script>
   <!-- FullCalendar script via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <!-- Backend client must load before schedule.js -->
   <script src="movesApi.js"></script>
-<script src="schedule.js"></script>
+  <script src="schedule.js"></script>
 </body>
 </html>
