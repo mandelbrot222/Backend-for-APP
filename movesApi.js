@@ -1,6 +1,7 @@
 // Front-end API for Boat/Trailer Moves via Google Apps Script.
-// After you deploy the Apps Script Web App, paste its /exec URL below.
-const APPS_SCRIPT_URL = https://script.google.com/macros/s/AKfycbzN-EcreIywIVX7mM-P50HkOV06AU3oairA6C0iEUObgFYMahglm8fENmDUMw9GmMsn_Q/exec;
+// Safe for GitHub Pages: POSTs use text/plain (no preflight).
+// Backend URL deployed from Apps Script:
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcJQVDwBoD2md2Dza5lBEwTwlKEgrry0mvvMZx5nSEexsf_GElCHlJ_7WBE45CPDFxvQ/exec';
 
 function qs(params){
   const u = new URL(APPS_SCRIPT_URL);
@@ -8,38 +9,50 @@ function qs(params){
   return u.toString();
 }
 
-async function listMoves(rangeStartISO, rangeEndISO){
-  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes(https://script.google.com/macros/s/AKfycbzN-EcreIywIVX7mM-P50HkOV06AU3oairA6C0iEUObgFYMahglm8fENmDUMw9GmMsn_Q/exec)) return [];
+export async function listMoves(rangeStartISO, rangeEndISO){
   const url = qs({ resource:'moves', start: rangeStartISO||'', end: rangeEndISO||'' });
-  const res = await fetch(url, { method:'GET', mode:'cors' });
+  const res = await fetch(url, { method:'GET' });
   if (!res.ok) throw new Error('listMoves failed');
   const data = await res.json();
   return Array.isArray(data) ? data.filter(r => String(r.Deleted).toLowerCase() !== 'true') : [];
 }
 
-async function createMove(record){
+export async function createMove(record){
   const res = await fetch(APPS_SCRIPT_URL, {
-    method:'POST', mode:'cors', headers:{'Content-Type':'application/json'},
+    method:'POST',
+    headers:{ 'Content-Type':'text/plain' },
     body: JSON.stringify({ action:'create', resource:'moves', record })
   });
   if(!res.ok) throw new Error('createMove failed');
   return await res.json();
 }
 
-async function updateMove(record){
+export async function updateMove(record){
   const res = await fetch(APPS_SCRIPT_URL, {
-    method:'POST', mode:'cors', headers:{'Content-Type':'application/json'},
+    method:'POST',
+    headers:{ 'Content-Type':'text/plain' },
     body: JSON.stringify({ action:'update', resource:'moves', record })
   });
   if(!res.ok) throw new Error('updateMove failed');
   return await res.json();
 }
 
-async function deleteMove(id){
+export async function deleteMove(id){
   const res = await fetch(APPS_SCRIPT_URL, {
-    method:'POST', mode:'cors', headers:{'Content-Type':'application/json'},
+    method:'POST',
+    headers:{ 'Content-Type':'text/plain' },
     body: JSON.stringify({ action:'delete', resource:'moves', id })
   });
   if(!res.ok) throw new Error('deleteMove failed');
   return await res.json();
+}
+
+try {
+  // if modules are supported, the exports above will work.
+} catch(e) {
+  // Fallback attach to window (non-module usage)
+  window.listMoves = listMoves;
+  window.createMove = createMove;
+  window.updateMove = updateMove;
+  window.deleteMove = deleteMove;
 }
